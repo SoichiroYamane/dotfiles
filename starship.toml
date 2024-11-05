@@ -1,0 +1,601 @@
+add_newline = true
+
+
+# Timeout for commands executed by starship (in milliseconds).
+command_timeout = 100
+
+
+# Timeout for starship to scan files (in milliseconds).
+scan_timeout = 500
+
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+$username\
+$hostname\
+$localip\
+$shlvl\
+$singularity\
+$kubernetes\
+$directory\
+$vcsh\
+$line_break\
+[│   ](bold #DCAC66)\
+${custom.line1}\
+$fossil_branch\
+${custom.git_server}\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$hg_branch\
+$pijul_channel\
+$docker_context\
+$package\
+${custom.c}\
+${custom.cpp}\
+$cmake\
+$cobol\
+$daml\
+$dart\
+$deno\
+$dotnet\
+$elixir\
+$elm\
+$erlang\
+$fennel\
+$golang\
+$guix_shell\
+$haskell\
+$haxe\
+$helm\
+$java\
+$julia\
+$kotlin\
+$gradle\
+$lua\
+$nim\
+$nodejs\
+$ocaml\
+$opa\
+$perl\
+$php\
+$pulumi\
+$purescript\
+$python\
+$raku\
+$rlang\
+$red\
+$ruby\
+$rust\
+$scala\
+$swift\
+$terraform\
+$vlang\
+$vagrant\
+$zig\
+$buf\
+$nix_shell\
+$conda\
+$meson\
+$spack\
+$memory_usage\
+$aws\
+$gcloud\
+$openstack\
+$azure\
+$env_var\
+$crystal\
+$sudo\
+${custom.git_last_commit}\
+${custom.ssh_no_keys}\
+${custom.ssh_keys}\
+$fill\
+$cmd_duration $jobs $time\
+${custom.git_scope}\
+$line_break\
+[╰─  ](bold #DCAC66)\
+$battery\
+$status\
+$os\
+$container\
+$shell\
+$character"""
+
+#
+
+################################################################################
+## Shell
+################################################################################
+
+
+
+[custom.git_server]
+disabled = false
+description = "Display symbol for remote Git server"
+command ="""
+GIT_REMOTE=$(git ls-remote --get-url 2> /dev/null)
+
+if [[ -z "$GIT_REMOTE" ]]; then
+    GIT_REMOTE_SYMBOL=" " # Git リモート URL が取得できない場合のデフォルトシンボル
+elif [[ "$GIT_REMOTE" =~ github ]]; then
+    GIT_REMOTE_SYMBOL=" "
+elif [[ "$GIT_REMOTE" =~ gitlab ]]; then
+    GIT_REMOTE_SYMBOL=" "
+elif [[ "$GIT_REMOTE" =~ bitbucket ]]; then
+    GIT_REMOTE_SYMBOL=" "
+elif [[ "$GIT_REMOTE" =~ git ]]; then
+    GIT_REMOTE_SYMBOL=" "
+else
+    GIT_REMOTE_SYMBOL=" "
+fi
+
+echo "$GIT_REMOTE_SYMBOL"
+"""
+when = 'git rev-parse --is-inside-work-tree 2> /dev/null'
+shell = ["bash"]
+style = "white bold"
+format = '[$output]($style) '
+
+
+[custom.git_scope]
+shell = ["bash"]
+disabled = false
+command = '''
+# printf "%s (%s)" \
+#   (if set -q GIT_AUTHOR_EMAIL; echo $GIT_AUTHOR_EMAIL; else; git config user.email; end) \
+#   (if set -q GIT_AUTHOR_NAME; echo $GIT_AUTHOR_NAME; else; git config user.name; end)
+
+if [[ -n "$GIT_AUTHOR_EMAIL" ]]; then
+    email=$GIT_AUTHOR_EMAIL
+else
+    email=$(git config user.email)
+fi
+
+if [[ -n "$GIT_AUTHOR_NAME" ]]; then
+    name=$GIT_AUTHOR_NAME
+else
+    name=$(git config user.name)
+fi
+
+COLOR="\033[38;2;220;172;102m"
+RESET="\033[0m"
+
+printf "\033[0m\n"
+# printf "${COLOR}│    %s${RESET}\n" "$name"
+# printf "${COLOR}│    %s${RESET}\n" "$email"
+'''
+description = 'The currently configured Git user.{email,name}'
+format = '$output '
+style = 'blue bold'
+when = 'git rev-parse --is-inside-work-tree'
+
+
+[custom.git_last_commit]
+shell = ["bash", "--noprofile", "--norc"]
+disabled = true
+description = "Display last commit hash and message"
+command = "git show -s --format='%h \"%s\"'"
+when = 'git rev-parse --is-inside-work-tree 2> /dev/null'
+style = "bright-yellow bold"
+format = "[$output]($style) "
+
+
+[custom.c]
+command = "gcc -dumpversion"
+symbol = ""
+detect_extensions = ["c"]
+style = "bold #303A91"
+shell = ["bash", "--noprofile", "--norc"]
+format = '\[[$symbol( v$output)]($style)\]'
+
+[custom.cpp]
+command = "gcc -dumpversion"
+symbol = ""
+detect_extensions = ["cpp"]
+style = "bold #759CCE"
+shell = ["bash", "--noprofile", "--norc"]
+format = '\[[$symbol( v$output)]($style)\]'
+
+
+
+[custom.ssh_no_keys]
+disabled = false
+description = "SSH missing keys"
+when = "ssh-add -l | grep -q 'no identities'"
+command = "echo  "
+format = '\[$symbol[$output]($style)\]'
+shell = ["bash", "--noprofile", "--norc"]
+symbol = " "
+style = "bold red"
+
+[custom.ssh_keys]
+disabled = false
+description = "SSH key count"
+when = "ssh-add -l | grep -v -q 'no identities'"
+command = "ssh-add -l | grep -v 'no identities' | wc -l"
+format = '\[$symbol[$output]($style)\]'
+shell = ["bash", "--noprofile", "--norc"]
+symbol = " "
+style = "bold fg:green"
+
+[custom.editor]
+command = '''
+if test "$EDITOR" = "vim"
+    echo ""
+else if test "$EDITOR" = "nvim"
+    echo ""
+end
+'''
+when = 'test -n "$EDITOR"'
+description = 'Display a different symbol based on the value of the $EDITOR environment variable'
+format = '[ $output]($style) '
+style = 'bold #649243'
+
+[fill]
+symbol = " "
+
+################################################################################
+## Shell
+
+[battery]
+disabled = true
+full_symbol = "🔋"
+charging_symbol = "🔌"
+discharging_symbol = "⚡"
+
+[[battery.display]]
+threshold = 30
+style = "bold red"
+
+[cmd_duration]
+min_time = 10_000                    # Show command duration over 10,000 milliseconds (=10 sec)
+format = '\[[⏱ $duration]($style)\]'
+style = 'yellow'
+
+[memory_usage]
+symbol = "󰍛 "
+# format = '\[$symbol[${ram}( | ${swap})]($style)\]'
+format = '\[$symbol[${ram_pct}]($style)\]'
+threshold = 70
+style = "bold dimmed white"
+disabled = false
+
+[time]
+time_format = "%T"
+format = " $time($style) "
+style = "bright-white"
+disabled = false
+
+[username]
+format = '\[[$user]($style)\]'
+style_user = "bold dimmed blue"
+show_always = false
+
+[hostname]
+ssh_only = false
+format = "<[$hostname]($style)>"
+trim_at = "-"
+style = "bold dimmed white"
+disabled = true
+
+[directory]
+truncation_length = 6
+format = "[$path]($style)[$lock_symbol]($lock_style) "
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+"Notes" = " "
+"Program" = " "
+
+################################################################################
+## GIT
+################################################################################
+[git_branch]
+format = '\[[$symbol$branch]($style)\]'
+symbol = ' '
+style = "bold #D8593D"
+
+# [git_state]
+# format = '\[[\($state( $progress_current of $progress_total)\)]($style)\]'
+
+[git_status]
+conflicted = "⚔️ "
+ahead = "[ ${count} ](bold red)"
+behind = "[ ${count} ](bold blue)"
+diverged = "󱡷  ${ahead_count}  ${behind_count} "
+untracked = "󰵤 ${count} "
+stashed = "󰏗 "
+modified = "󱪙 ${count} "
+staged = " ${count} "
+renamed = "󰑕 ${count} "
+deleted = " ${count} "
+style = "bright-white"
+format = '\[[󰊢 󱖫 :](bold #D8593D) $all_status$ahead_behind\]'
+
+
+[git_commit]
+commit_hash_length = 8
+style = "bold white"
+tag_symbol = ' '
+disabled = false
+
+################################################################################
+## Languages & Tools
+################################################################################
+[aws]
+format = '\[[$symbol ($profile)(\($region\))(\[$duration\])]($style)\]'
+style = "bold #F1A13B"
+symbol = ' '
+
+[bun]
+format = '\[[$symbol ($version)]($style)\]'
+
+[c]
+symbol = ""
+style = "bold #759CCE"
+detect_extensions = ["c", "h", "cpp", "hpp"]
+format = '\[[$symbol ($version)]($style)\]'
+
+
+[cmake]
+format = '\[[$symbol($version)]($style)\]'
+
+[cobol]
+format = '\[[$symbol($version)]($style)\]'
+
+[conda]
+format = '\[[$symbol$environment]($style)\]'
+
+[crystal]
+format = '\[[$symbol($version)]($style)\]'
+
+symbol = " "
+
+[daml]
+format = '\[[$symbol($version)]($style)\]'
+
+[dart]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #5FB6F0"
+symbol = " "
+
+[deno]
+format = '\[[$symbol($version)]($style)\]'
+
+[docker_context]
+format = '\[[$symbol$context]($style)\]'
+style = "bold #4393E0"
+symbol = " "
+
+[dotnet]
+format = '\[[$symbol($version)(󰣉 $tfm)]($style)\]'
+symbol = " "
+
+[elixir]
+format = '\[[$symbol($version \(OTP $otp_version\))]($style)\]'
+style = "bold #3D2255"
+symbol = " "
+
+[elm]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #60B5CC"
+symbol = " "
+
+[erlang]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #9E243C"
+symbol = " "
+
+[fennel]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #4F7D5A"
+symbol = " "
+
+[fossil_branch]
+format = '\[[$symbol$branch]($style)\]'
+
+
+[gcloud]
+format = '\[[$symbol$account(@$domain)(\($region\))]($style)\]'
+style = "bold #4285F4"
+symbol = "󱇶 "
+
+[golang]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #4FACD4"
+symbol = " "
+
+[gradle]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #02303A"
+symbol = " "
+
+[guix_shell]
+format = '\[[$symbol]($style)\]'
+style = "bold #F4CF4B"
+symbol = " "
+
+[haskell]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #615686"
+symbol = " "
+
+[haxe]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #EA9C42"
+symbol = " "
+
+[helm]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #191E87"
+symbol = " "
+
+[hg_branch]
+format = '\[[$symbol$branch]($style)\]'
+style = "bold #D8593D"
+symbol = " "
+
+[java]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #DD8947"
+symbol = " "
+
+[julia]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #9060AF"
+symbol = " "
+
+[kotlin]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #AD33E0"
+symbol = " "
+
+[kubernetes]
+format = '\[[$symbol$context( \($namespace\))]($style)\]'
+style = "bold #4670DE"
+symbol = "󱃾 "
+
+[lua]
+format = '\[[$symbol($version)]($style)\]'
+# style = "bold #08087E"
+style = "bold white"
+symbol = " "
+
+[meson]
+format = '\[[$symbol$project]($style)\]'
+
+[nim]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #EED648"
+symbol = " "
+
+[nix_shell]
+format = '\[[$symbol$state( \($name\))]($style)\]'
+style = "bold #8EB8DF"
+symbol = "󱄅 "
+
+[nodejs]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #6A9F54"
+symbol = "󰎙 "
+
+[ocaml]
+format = '\[[$symbol($version)(\($switch_indicator$switch_name\))]($style)\]'
+style = "bold #E08235"
+symbol = " "
+
+[opa]
+format = '\[[$symbol($version)]($style)\]'
+
+[openstack]
+format = '\[[$symbol$cloud(\($project\))]($style)\]'
+
+[character]
+format = '$symbol '
+success_symbol = "[ ](bold green)"
+error_symbol = "[ ](bold red)"
+
+[shlvl]
+disabled = false
+threshold = 1
+# symbol = "🐶 🦴 "
+symbol ="   "
+style = "bold #DCAC66"
+format = '[$symbol$shlvl  ]($style)'
+
+
+[shell]
+disabled = false
+bash_indicator = ""
+zsh_indicator = ""
+fish_indicator = ""
+format = '[$indicator $name]($style) '
+
+
+[os]
+disabled = true
+format = '$symbol'
+symbols.Macos = "󰀵 "
+
+[package]
+format = '\[[$symbol$version]($style)\]'
+symbol = " "
+
+[perl]
+format = '\[[$symbol($version)]($style)\]'
+symbol = " "
+
+[php]
+format = '\[[$symbol($version)]($style)\]'
+symbol = "󰌟 "
+
+[pijul_channel]
+format = '\[[$symbol$channel]($style)\]'
+
+[pulumi]
+format = '\[[$symbol$stack]($style)\]'
+
+[purescript]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold white"
+symbol = " "
+
+[python]
+format = '\[[${symbol}${pyenv_prefix}(${version})(\($virtualenv\))]($style)\]'
+style = "bold #F0CE5C"
+symbol = " "
+
+[raku]
+format = '\[[$symbol($version-$vm_version)]($style)\]'
+
+[red]
+format = '\[[$symbol($version)]($style)\]'
+
+[ruby]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #DA3835"
+
+symbol = " "
+
+[rust]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #993F22"
+symbol = " "
+
+[scala]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #CE4836"
+symbol = " "
+
+[spack]
+format = '\[[$symbol$environment]($style)\]'
+
+[sudo]
+format = '\[[as $symbol]\]'
+
+[swift]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #E9563C"
+symbol = " "
+
+[terraform]
+format = '\[[$symbol$workspace]($style)\]'
+style = "bold #6244DD"
+symbol = "󱁢 "
+
+[vagrant]
+format = '\[[$symbol($version)]($style)\]'
+
+[vlang]
+format = '\[[$symbol($version)]($style)\]'
+
+[zig]
+format = '\[[$symbol($version)]($style)\]'
+style = "bold #EDB45A"
+symbol = " "
