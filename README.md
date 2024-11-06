@@ -8,15 +8,15 @@
 
 - [bat](https://github.com/sharkdp/bat)
 
-```bash
-brew install bat
-```
+    ```bash
+    brew install bat
+    ```
 
 - [borders](https://github.com/FelixKratz/JankyBorders)
 
-```bash
-brew tap FelixKratz/formulae && brew install borders
-```
+    ```bash
+    brew tap FelixKratz/formulae && brew install borders
+    ```
 
 - [lazygit](https://github.com/jesseduffield/lazygit)
 
