@@ -6,6 +6,12 @@
 
 ## 🍺 Features
 
+- [amazon-q](https://aws.amazon.com/q/developer/)
+
+    ```bash
+    brew install amazon-q
+    ```
+
 - [bat](https://github.com/sharkdp/bat)
 
     ```bash
