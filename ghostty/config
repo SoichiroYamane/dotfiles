@@ -1,0 +1,18 @@
+font-family = JetBrainsMono Nerd Font
+
+font-size = 16
+
+theme = tokyonight
+
+macos-titlebar-style = hidden
+
+cursor-style-blink = true
+
+window-padding-x = 0
+window-padding-y = 0
+
+background-blur-radius = 20
+background-opacity = 0.7
+
+
+mouse-hide-while-typing = true
