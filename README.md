@@ -48,6 +48,12 @@
     brew install koekeishiya/formulae/skhd && brew services start skhd
     ```
 
+- [wezterm](https://github.com/wez/wezterm)
+
+    ```bash
+    brew install --cask wezterm
+    ```
+
 - [yabai](https://github.com/koekeishiya/yabai)
 
     ```bash
@@ -93,7 +99,7 @@
 
 ## 🗓️ TODO
 
-- [ ] Add wezterm
+- [x] Add wezterm
 - [ ] Add tmux
 - [ ] Add fish
 - [ ] Add neovim
